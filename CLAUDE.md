@@ -18,23 +18,40 @@ The Writing Gym is a coaching tool that helps people become better writers by ma
 - 3-iteration cycle before unlocking AI rewrites
 - Scoring compares self vs AI assessment against user's stated goals
 
-## Simple Prototype Scope
+## Current Implementation
 
-Build the core learning loop:
+Split-view workspace with persistent draft editor and scrollable iteration history:
 
-1. **Pre-draft questions** (3-4 key questions to establish context and criteria)
-2. **Draft input** (single text area)
-3. **Self-assessment** (rate how well draft meets extracted criteria)
-4. **AI assessment reveal** (scores + comparison to self-assessment)
-5. **One iteration cycle** (prove the loop works)
+```
+┌─────────────────────┬─────────────────────┐
+│   Draft Editor      │   History Panel     │
+│   (always visible)  │   (scrollable)      │
+│   - Pre-populated   │   - Criteria        │
+│   - Submit button   │   - Iteration 1     │
+│                     │     - Draft         │
+│                     │     - Self-assess   │
+│                     │     - AI feedback   │
+│                     │   - Iteration 2...  │
+└─────────────────────┴─────────────────────┘
+```
+
+**Two-phase flow**:
+1. **Context phase**: Pre-draft questions establish criteria
+2. **Workspace phase**: Draft and iterate with visible history
+
+**Core learning loop**:
+1. Answer pre-draft questions → criteria extracted
+2. Write/edit draft in left panel
+3. Submit → draft appears in history panel
+4. Self-assess inline (1-5 scale per criterion)
+5. AI assessment fetched → comparison shown with deltas
+6. Editor pre-fills with previous draft → revise and repeat
 
 **Deferred to later**:
-- Full 3-iteration tracking
+- 3-iteration unlock gate for AI rewrites
 - Color-coded text highlighting
 - Inline annotations
-- Side-by-side editing
 - Export functionality
-- AI rewrite unlock
 - Sign-in and progress tracking
 - Personal style library
 
@@ -52,14 +69,36 @@ writing-gym/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/
-│   │   ├── App.jsx
+│   │   │   ├── PreDraftQuestions.jsx   # Context phase entry
+│   │   │   ├── Workspace.jsx           # Split-view container
+│   │   │   ├── DraftEditor.jsx         # Left panel - always visible
+│   │   │   ├── HistoryPanel.jsx        # Right panel - scrollable
+│   │   │   ├── CriteriaSummary.jsx     # Collapsible criteria list
+│   │   │   ├── IterationCard.jsx       # Draft + assessment container
+│   │   │   ├── InlineSelfAssessment.jsx
+│   │   │   └── AssessmentComparison.jsx
+│   │   ├── App.jsx                     # Phase/state management
 │   │   └── main.jsx
 │   ├── index.html
 │   └── package.json
 ├── server/                 # Express backend
 │   ├── index.js
 │   └── package.json
+├── .bloglog/               # Development timeline
 └── README.md
+```
+
+**Component Hierarchy**:
+```
+App.jsx
+├── PreDraftQuestions (context phase)
+└── Workspace (workspace phase)
+    ├── DraftEditor
+    └── HistoryPanel
+        ├── CriteriaSummary
+        └── IterationCard (one per iteration)
+            ├── InlineSelfAssessment
+            └── AssessmentComparison
 ```
 
 **API Design**:
@@ -149,13 +188,23 @@ Keep API endpoints focused but extensible:
 
 ### Component Design Principles
 
-Build comparison views to accept any two assessment sources:
+Components are structured for reusability and extension:
 
 ```jsx
-<ComparisonView 
-  sourceA={selfAssessment} 
-  sourceB={aiAssessment}
-  // Later: sourceB could be historicalAssessment, peerAssessment, expertAssessment
+// AssessmentComparison accepts any two assessment sources
+<AssessmentComparison
+  criteria={criteria}
+  selfAssessment={scores}
+  aiAssessment={aiData}
+  // Later: could compare iteration 1 vs 3, peer vs self, etc.
+/>
+
+// IterationCard is self-contained - handles its own assessment lifecycle
+<IterationCard
+  iteration={iteration}
+  criteria={criteria}
+  onSelfAssessSubmit={handler}
+  isActive={boolean}
 />
 ```
 
@@ -180,25 +229,25 @@ function exportSession(session, format = 'json') {
 
 ## Development Phases
 
-### Phase 1: Prototype (Current)
+### Phase 1: Prototype (Complete)
 - Pre-draft questions UI
-- Draft input
-- Self-assessment scoring
-- AI assessment + comparison
-- Basic iteration (re-submit draft)
+- Split-view workspace (editor + history)
+- Inline self-assessment scoring
+- AI assessment + comparison with deltas
+- Multi-iteration tracking with history
+- Editor pre-population for revision
 
 ### Phase 2: MVP
-- Full 3-iteration tracking
-- Side-by-side editing view
-- AI rewrite unlock after iteration 3
+- 3-iteration gate before AI rewrite unlock
 - Export session (.json) + final draft
+- localStorage persistence within session
 
-### Phase 3: Extensions
-- User sign-in
+### Phase 3: Freemium Product
+- User sign-in (free tier: no persistence)
+- Premium: save scenarios and context
 - Progress tracking across sessions
-- Writing evolution reporting
+- Calibration improvement metrics
 - Personal style library
-- User-editable criteria
 - Mobile optimization
 
 ## Pre-Draft Questions
@@ -260,17 +309,26 @@ bl init --name "The Writing Gym"
 - `bl serve` - Start web interface (localhost:3001)
 - `bl generate` - Generate blog post (interactive)
 
-## First Steps
+## Development Log
 
-1. Initialize BlogLog
-2. Set up project structure (client + server)
-3. Build pre-draft questions UI
-4. Implement criteria extraction
-5. Build draft input + self-assessment UI
-6. Implement AI assessment API
-7. Build comparison view
-8. Test one full iteration cycle
+**Completed**:
+1. BlogLog initialized for development tracking
+2. Project structure (React+Vite+Tailwind client, Express server)
+3. Pre-draft questions UI with validation
+4. Criteria extraction API (Claude-powered)
+5. Split-view workspace with persistent editor
+6. Inline self-assessment in history panel
+7. AI assessment API with reasoning
+8. Comparison view with score deltas
+9. Multi-iteration history tracking
+
+**Next up**:
+- 3-iteration gate for AI rewrite unlock
+- Session export functionality
+- localStorage persistence
 
 ---
 
 **Portfolio Context**: This tool demonstrates AI product thinking - using AI to augment human capability rather than replace it. Shows understanding of skill development, learning psychology, and the risks of AI dependency.
+
+**Commercial Potential**: Freemium model where core coaching loop is free, premium unlocks scenario persistence, calibration tracking, and style libraries.

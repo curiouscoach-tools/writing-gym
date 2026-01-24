@@ -67,6 +67,13 @@
       "timestamp": "2026-01-24T19:49:54.805Z",
       "type": "win",
       "content": "Split-view workspace refactor complete - draft editor always visible alongside scrollable iteration history. Starting to feel commercial-ready."
+    },
+    {
+      "id": "d07418c4-afdf-445d-ac27-45fb877499b0",
+      "timestamp": "2026-01-24T20:11:35.776Z",
+      "type": "commit",
+      "message": "Refactor to split-view workspace with persistent draft editor and scrollable iteration history",
+      "gitHash": "73d074c2eee170d22531c9238195a072c10883cd"
     }
   ]
 }
