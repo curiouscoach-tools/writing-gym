@@ -17,6 +17,37 @@
       "timestamp": "2026-01-24T18:09:24.557Z",
       "type": "note",
       "content": "Built PreDraftQuestions component with 4 coaching questions (audience, intent, concerns, type). Wired into App.jsx with validation, loading state, error handling, and API call to /api/extract-criteria. Shows extracted criteria on draft step."
+    },
+    {
+      "id": "242ddf87-970c-4f7f-b65c-12bdf56db1a1",
+      "timestamp": "2026-01-24T18:11:52.555Z",
+      "type": "commit",
+      "message": "Initial scaffold: React+Vite+Tailwind client, Express server with PreDraftQuestions component",
+      "gitHash": "faf6fde58a9434172ddfa13a18bf53c117b20acf"
+    },
+    {
+      "id": "7ad636c1-e10d-4a39-9231-1529f4d97a89",
+      "timestamp": "2026-01-24T18:14:25.510Z",
+      "type": "note",
+      "content": "Implemented /api/extract-criteria with Anthropic API. Prompt extracts 3-5 criteria from user's context answers, phrased as ratable statements. Uses claude-sonnet-4-20250514, returns JSON with id, description, extracted_from, and scale."
+    },
+    {
+      "id": "38e4cdff-3b7b-475b-9ea0-ac44a70f4491",
+      "timestamp": "2026-01-24T18:49:17.261Z",
+      "type": "note",
+      "content": "Built DraftInput (text area with criteria reminder, char count) and SelfAssessment (1-5 scale buttons for each criterion with labels). Wired into App.jsx flow: context → draft → self_assess → compare. Comparison view shows raw JSON for now."
+    },
+    {
+      "id": "eb55a0bf-ef32-4950-97ed-9d15841c764d",
+      "timestamp": "2026-01-24T18:50:57.923Z",
+      "type": "note",
+      "content": "Implemented /api/assess-draft with Anthropic API. Scores each criterion 1-5 with reasoning. Prompt includes full context (audience, intent, concerns, type), criteria list, and draft. Returns scores and reasoning objects keyed by criterion ID."
+    },
+    {
+      "id": "a42b4ef2-c946-4459-9719-8772e855b7d5",
+      "timestamp": "2026-01-24T18:55:25.681Z",
+      "type": "win",
+      "content": "Completed prototype learning loop! ComparisonView shows self vs AI scores side-by-side with delta indicators (overestimate/underestimate), AI reasoning, average scores, and Revise Draft button for iteration."
     }
   ]
 }

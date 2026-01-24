@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import PreDraftQuestions from './components/PreDraftQuestions'
+import DraftInput from './components/DraftInput'
+import SelfAssessment from './components/SelfAssessment'
+import ComparisonView from './components/ComparisonView'
 
 const STEPS = {
   CONTEXT: 'context',
@@ -21,7 +24,9 @@ function App() {
       type: ''
     },
     criteria: [],
-    drafts: []
+    currentDraft: '',
+    selfAssessment: null,
+    aiAssessment: null
   })
 
   const updateContext = (newContext) => {
@@ -53,6 +58,50 @@ function App() {
     }
   }
 
+  const handleDraftSubmit = (draft) => {
+    setSession(prev => ({ ...prev, currentDraft: draft }))
+    setStep(STEPS.SELF_ASSESS)
+  }
+
+  const handleSelfAssessSubmit = async (scores) => {
+    setSession(prev => ({ ...prev, selfAssessment: scores }))
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/assess-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          draft: session.currentDraft,
+          criteria: session.criteria,
+          context: session.context
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI assessment')
+      }
+
+      const data = await response.json()
+      setSession(prev => ({ ...prev, aiAssessment: data }))
+      setStep(STEPS.COMPARE)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleIterate = () => {
+    setSession(prev => ({
+      ...prev,
+      selfAssessment: null,
+      aiAssessment: null
+    }))
+    setStep(STEPS.DRAFT)
+  }
+
   const renderStep = () => {
     switch (step) {
       case STEPS.CONTEXT:
@@ -66,17 +115,29 @@ function App() {
         )
       case STEPS.DRAFT:
         return (
-          <div className="text-center py-8">
-            <p className="text-gray-600">Draft input coming next...</p>
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-700 mb-2">Extracted criteria:</p>
-              <ul className="text-sm text-gray-600">
-                {session.criteria.map((c, i) => (
-                  <li key={c.id || i} className="py-1">• {c.description}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <DraftInput
+            criteria={session.criteria}
+            onSubmit={handleDraftSubmit}
+          />
+        )
+      case STEPS.SELF_ASSESS:
+        return (
+          <SelfAssessment
+            criteria={session.criteria}
+            draft={session.currentDraft}
+            onSubmit={handleSelfAssessSubmit}
+            isLoading={isLoading}
+          />
+        )
+      case STEPS.COMPARE:
+        return (
+          <ComparisonView
+            criteria={session.criteria}
+            selfAssessment={session.selfAssessment}
+            aiAssessment={session.aiAssessment}
+            draft={session.currentDraft}
+            onIterate={handleIterate}
+          />
         )
       default:
         return (
