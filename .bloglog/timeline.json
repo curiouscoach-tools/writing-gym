@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "id": "b60782a7-06d0-481e-bf76-9023fdf7e36f",
+      "timestamp": "2026-01-24T17:56:30.241Z",
+      "type": "win",
+      "content": "Read and understood the Writing Gym context - a coaching tool that builds writers' skills through structured reflection rather than AI rewrites. Ready to build the prototype: pre-draft questions → draft → self-assessment → AI assessment → comparison loop."
+    },
+    {
+      "id": "e41ee91c-64c1-47f8-b28a-2003c332a4a1",
+      "timestamp": "2026-01-24T18:07:47.242Z",
+      "type": "note",
+      "content": "Scaffolded project structure: React+Vite+Tailwind client on port 3000, Express server on port 3001 with API proxy. App.jsx has step state machine (context→draft→self_assess→ai_assess→compare). Server has placeholder endpoints for /api/extract-criteria and /api/assess-draft."
+    },
+    {
+      "id": "02db15a6-7620-4436-be59-80ca216b4ffc",
+      "timestamp": "2026-01-24T18:09:24.557Z",
+      "type": "note",
+      "content": "Built PreDraftQuestions component with 4 coaching questions (audience, intent, concerns, type). Wired into App.jsx with validation, loading state, error handling, and API call to /api/extract-criteria. Shows extracted criteria on draft step."
+    }
+  ]
+}
