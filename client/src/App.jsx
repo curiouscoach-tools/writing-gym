@@ -40,11 +40,11 @@ function App() {
         body: JSON.stringify({ context: session.context })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to extract criteria')
-      }
-
       const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.detail || data.error || 'Failed to extract criteria')
+      }
       setSession(prev => ({ ...prev, criteria: data.criteria }))
       setPhase(PHASES.WORKSPACE)
     } catch (err) {
@@ -96,11 +96,11 @@ function App() {
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to get AI assessment')
-      }
-
       const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.detail || data.error || 'Failed to get AI assessment')
+      }
 
       setSession(prev => ({
         ...prev,

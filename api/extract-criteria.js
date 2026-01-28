@@ -1,5 +1,6 @@
 import { anthropic, parseJsonResponse } from './lib/anthropic.js'
 import { CONFIG } from './lib/config.js'
+import { validateContext, extractResponseText, validateCriteriaResponse } from './lib/validation.js'
 
 export default async function handler(req, res) {
   // Only allow POST
@@ -9,8 +10,12 @@ export default async function handler(req, res) {
 
   const { context } = req.body
 
-  if (!context) {
-    return res.status(400).json({ error: 'Context is required' })
+  const contextValidation = validateContext(context)
+  if (!contextValidation.valid) {
+    return res.status(400).json({
+      error: 'Missing required context fields',
+      missing: contextValidation.missing
+    })
   }
 
   const prompt = `You are a writing coach helping someone prepare to write. Based on their answers below, extract 3-5 specific criteria they can use to assess whether their draft succeeds.
@@ -44,11 +49,12 @@ Respond with JSON only, no other text:
       messages: [{ role: 'user', content: prompt }]
     })
 
-    const responseText = message.content[0].text
+    const responseText = extractResponseText(message)
     const parsed = parseJsonResponse(responseText)
+    const validatedCriteria = validateCriteriaResponse(parsed)
 
     // Add scale to each criterion
-    const criteria = parsed.criteria.map(c => ({
+    const criteria = validatedCriteria.map(c => ({
       ...c,
       scale: CONFIG.assessmentScale
     }))
@@ -56,6 +62,9 @@ Respond with JSON only, no other text:
     res.status(200).json({ criteria })
   } catch (err) {
     console.error('Error extracting criteria:', err)
-    res.status(500).json({ error: 'Failed to extract criteria' })
+    res.status(500).json({
+      error: 'Failed to extract criteria',
+      detail: err.message
+    })
   }
 }

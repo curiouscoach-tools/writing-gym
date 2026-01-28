@@ -1,5 +1,6 @@
 import { anthropic, parseJsonResponse } from './lib/anthropic.js'
 import { CONFIG } from './lib/config.js'
+import { validateContext, extractResponseText, validateAssessmentResponse } from './lib/validation.js'
 
 export default async function handler(req, res) {
   // Only allow POST
@@ -9,8 +10,20 @@ export default async function handler(req, res) {
 
   const { draft, criteria, context } = req.body
 
-  if (!draft || !criteria || !context) {
-    return res.status(400).json({ error: 'Draft, criteria, and context are required' })
+  if (!draft || typeof draft !== 'string' || !draft.trim()) {
+    return res.status(400).json({ error: 'Draft is required and must be non-empty' })
+  }
+
+  if (!criteria || !Array.isArray(criteria) || criteria.length === 0) {
+    return res.status(400).json({ error: 'Criteria array is required and must not be empty' })
+  }
+
+  const contextValidation = validateContext(context)
+  if (!contextValidation.valid) {
+    return res.status(400).json({
+      error: 'Missing required context fields',
+      missing: contextValidation.missing
+    })
   }
 
   const criteriaList = criteria.map((c, i) => `${i + 1}. [ID: ${c.id}] ${c.description}`).join('\n')
@@ -57,15 +70,20 @@ Respond with JSON only, no other text:
       messages: [{ role: 'user', content: prompt }]
     })
 
-    const responseText = message.content[0].text
+    const responseText = extractResponseText(message)
     const parsed = parseJsonResponse(responseText)
+    const expectedIds = criteria.map(c => c.id)
+    const validated = validateAssessmentResponse(parsed, expectedIds)
 
     res.status(200).json({
-      scores: parsed.scores,
-      reasoning: parsed.reasoning
+      scores: validated.scores,
+      reasoning: validated.reasoning
     })
   } catch (err) {
     console.error('Error assessing draft:', err)
-    res.status(500).json({ error: 'Failed to assess draft' })
+    res.status(500).json({
+      error: 'Failed to assess draft',
+      detail: err.message
+    })
   }
 }
