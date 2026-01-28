@@ -59,9 +59,10 @@ Split-view workspace with persistent draft editor and scrollable iteration histo
 
 **Stack**:
 - Frontend: React + Tailwind (Vite)
-- Backend: Node/Express (thin API proxy for Anthropic)
+- Backend: Vercel Serverless Functions (thin API proxy for Anthropic)
 - Storage: localStorage (session state only)
 - Deployment: Vercel (static frontend + serverless functions)
+- Development: `vercel dev` runs everything locally
 
 **File Structure**:
 ```
@@ -81,9 +82,12 @@ writing-gym/
 │   │   └── main.jsx
 │   ├── index.html
 │   └── package.json
-├── server/                 # Express backend
-│   ├── index.js
+├── api/                    # Vercel serverless functions
+│   ├── extract-criteria.js # Parse context → criteria
+│   ├── assess-draft.js     # Score draft against criteria
+│   ├── health.js           # Health check endpoint
 │   └── package.json
+├── vercel.json             # Deployment configuration
 ├── .bloglog/               # Development timeline
 └── README.md
 ```

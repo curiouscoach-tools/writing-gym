@@ -45,32 +45,32 @@ git clone https://github.com/YOUR_USERNAME/writing-gym.git
 cd writing-gym
 
 # Install dependencies
-cd server && npm install
-cd ../client && npm install
+npm install --prefix api
+npm install --prefix client
 
 # Set up environment
-cp server/.env.example server/.env
-# Add your ANTHROPIC_API_KEY to server/.env
+cp .env.example .env.local
+# Add your ANTHROPIC_API_KEY to .env.local
 
-# Run development servers
-cd server && npm run dev    # Terminal 1
-cd client && npm run dev    # Terminal 2
+# Run development server (uses Vercel CLI)
+npx vercel dev
 ```
 
-Visit `http://localhost:5173`
+Visit `http://localhost:3000`
 
 ## Tech Stack
 
 - **Frontend**: React + Tailwind CSS (Vite)
-- **Backend**: Node/Express (API proxy for Anthropic)
+- **Backend**: Vercel Serverless Functions (API proxy for Anthropic)
 - **AI**: Claude API for criteria extraction and assessment
 - **Storage**: In-memory (session only for now)
+- **Deployment**: Vercel
 
 ## Project Structure
 
 ```
 writing-gym/
-├── client/                 # React frontend
+├── client/                 # React frontend (Vite)
 │   └── src/
 │       ├── components/
 │       │   ├── PreDraftQuestions.jsx
@@ -79,10 +79,24 @@ writing-gym/
 │       │   ├── HistoryPanel.jsx
 │       │   └── ...
 │       └── App.jsx
-├── server/                 # Express backend
-│   └── index.js
+├── api/                    # Vercel serverless functions
+│   ├── extract-criteria.js
+│   ├── assess-draft.js
+│   └── health.js
+├── vercel.json             # Vercel deployment config
 └── .bloglog/               # Development timeline
 ```
+
+## Architecture
+
+This project uses **Vercel's serverless architecture**:
+
+- **Frontend**: Static React app built with Vite, served from `client/dist`
+- **API**: Serverless functions in `/api` handle Claude API calls
+- **Development**: `vercel dev` runs both frontend and API locally
+- **Production**: Vercel hosts static files and serverless functions together
+
+The API functions act as a thin proxy to the Anthropic API, keeping the API key server-side.
 
 ## API Endpoints
 
