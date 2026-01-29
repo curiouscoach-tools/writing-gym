@@ -1,4 +1,4 @@
-import { anthropic, parseJsonResponse } from './lib/anthropic.js'
+import { anthropic, parseJsonResponse, validateEnv } from './lib/anthropic.js'
 import { CONFIG } from './lib/config.js'
 import { validateContext, extractResponseText, validateAssessmentResponse } from './lib/validation.js'
 
@@ -6,6 +6,14 @@ export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  // Validate environment early
+  try {
+    validateEnv()
+  } catch (err) {
+    console.error('Environment configuration error:', err.message)
+    return res.status(503).json({ error: 'Service temporarily unavailable' })
   }
 
   const { draft, criteria, context } = req.body
