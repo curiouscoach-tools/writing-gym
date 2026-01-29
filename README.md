@@ -72,14 +72,15 @@ Visit `http://localhost:3000`
 writing-gym/
 ├── client/                 # React frontend (Vite)
 │   └── src/
-│       ├── components/
-│       │   ├── PreDraftQuestions.jsx
-│       │   ├── Workspace.jsx
-│       │   ├── DraftEditor.jsx
-│       │   ├── HistoryPanel.jsx
-│       │   └── ...
+│       ├── components/     # UI components
+│       ├── hooks/          # Custom hooks (useSession)
+│       ├── config.js       # Client configuration
 │       └── App.jsx
 ├── api/                    # Vercel serverless functions
+│   ├── lib/                # Shared utilities
+│   │   ├── config.js       # API configuration
+│   │   ├── anthropic.js    # Claude client + helpers
+│   │   └── validation.js   # Input validation
 │   ├── extract-criteria.js
 │   ├── assess-draft.js
 │   └── health.js

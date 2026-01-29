@@ -78,11 +78,18 @@ writing-gym/
 │   │   │   ├── IterationCard.jsx       # Draft + assessment container
 │   │   │   ├── InlineSelfAssessment.jsx
 │   │   │   └── AssessmentComparison.jsx
-│   │   ├── App.jsx                     # Phase/state management
+│   │   ├── hooks/
+│   │   │   └── useSession.js           # Session state + API logic
+│   │   ├── config.js                   # Client configuration
+│   │   ├── App.jsx                     # Phase/UI management
 │   │   └── main.jsx
 │   ├── index.html
 │   └── package.json
 ├── api/                    # Vercel serverless functions
+│   ├── lib/
+│   │   ├── config.js       # API configuration (model, tokens, scale)
+│   │   ├── anthropic.js    # Claude client + parseJsonResponse
+│   │   └── validation.js   # Input/response validation utilities
 │   ├── extract-criteria.js # Parse context → criteria
 │   ├── assess-draft.js     # Score draft against criteria
 │   ├── health.js           # Health check endpoint
@@ -184,7 +191,7 @@ const CONFIG = {
 
 Keep API endpoints focused but extensible:
 
-- `POST /api/analyze-context` - Returns criteria + metadata (not just criteria)
+- `POST /api/extract-criteria` - Returns criteria + metadata (not just criteria)
 - `POST /api/assess-draft` - Accepts flexible assessment config
 - `POST /api/export-session` - Takes format parameter from day one
 
@@ -317,7 +324,7 @@ bl init --name "The Writing Gym"
 
 **Completed**:
 1. BlogLog initialized for development tracking
-2. Project structure (React+Vite+Tailwind client, Express server)
+2. Project structure (React+Vite+Tailwind client, Vercel serverless API)
 3. Pre-draft questions UI with validation
 4. Criteria extraction API (Claude-powered)
 5. Split-view workspace with persistent editor
@@ -325,6 +332,9 @@ bl init --name "The Writing Gym"
 7. AI assessment API with reasoning
 8. Comparison view with score deltas
 9. Multi-iteration history tracking
+10. Shared config/utilities for API and client
+11. Input validation and improved error handling
+12. useSession hook for cleaner state management
 
 **Next up**:
 - 3-iteration gate for AI rewrite unlock
