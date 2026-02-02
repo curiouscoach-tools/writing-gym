@@ -80,6 +80,8 @@ ${draft}
 
 Where a criterion includes [Writer's context: "..."], the writer has provided additional context about what they're trying to achieve. Factor this into your scoring and explicitly reference it in your reasoning — acknowledge whether the draft addresses the point they raised.
 
+Before scoring criteria, check the draft for general writing quality issues: duplicated content, repeated sections, spelling/grammar errors, structural problems, or anything that would immediately stand out to a reader. Report these as quality flags.
+
 For each criterion, provide:
 - A score (1-5)
 - Brief reasoning (1-2 sentences explaining why you gave that score, with specific examples from the draft)
@@ -89,6 +91,7 @@ For each criterion, provide:
 
 Respond with JSON only, no other text:
 {
+  "qualityFlags": ["description of issue", ...],
   "scores": {
     "criterion_id": score_number,
     ...
@@ -101,7 +104,9 @@ Respond with JSON only, no other text:
     "criterion_id": "coaching question or null",
     ...
   }
-}`
+}
+
+If there are no quality issues, return an empty array for qualityFlags.`
 
   try {
     const message = await anthropic.messages.create({
@@ -118,7 +123,8 @@ Respond with JSON only, no other text:
     res.status(200).json({
       scores: validated.scores,
       reasoning: validated.reasoning,
-      suggestions: validated.suggestions
+      suggestions: validated.suggestions,
+      qualityFlags: validated.qualityFlags
     })
   } catch (err) {
     console.error('Error assessing draft:', err)

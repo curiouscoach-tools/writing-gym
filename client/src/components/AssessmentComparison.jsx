@@ -121,6 +121,24 @@ function CriterionNote({ criterionId, note, onSave }) {
   )
 }
 
+function QualityFlags({ flags }) {
+  if (!flags || flags.length === 0) return null
+
+  return (
+    <div className="bg-amber-50 border border-amber-300 rounded-lg p-3">
+      <p className="text-xs font-semibold text-amber-800 mb-1.5">Writing quality issues spotted:</p>
+      <ul className="space-y-1">
+        {flags.map((flag, i) => (
+          <li key={i} className="text-xs text-amber-700 flex items-start gap-1.5">
+            <span className="shrink-0 mt-0.5">&#9888;</span>
+            <span>{flag}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function AssessmentComparison({ criteria, selfAssessment, aiAssessment, criterionNotes = {}, onCriterionNote, previousAiScores }) {
   const hasSelfAssessment = !!selfAssessment
 
@@ -132,6 +150,7 @@ function AssessmentComparison({ criteria, selfAssessment, aiAssessment, criterio
         aiAssessment={aiAssessment}
         criterionNotes={criterionNotes}
         onCriterionNote={onCriterionNote}
+        qualityFlags={aiAssessment.qualityFlags}
       />
     )
   }
@@ -143,12 +162,13 @@ function AssessmentComparison({ criteria, selfAssessment, aiAssessment, criterio
       previousAiScores={previousAiScores}
       criterionNotes={criterionNotes}
       onCriterionNote={onCriterionNote}
+      qualityFlags={aiAssessment.qualityFlags}
     />
   )
 }
 
 // Mode A: Iteration 1 — self vs AI calibration
-function CalibrationView({ criteria, selfAssessment, aiAssessment, criterionNotes, onCriterionNote }) {
+function CalibrationView({ criteria, selfAssessment, aiAssessment, criterionNotes, onCriterionNote, qualityFlags }) {
   const getDeltaClass = (selfScore, aiScore) => {
     const delta = Math.abs(selfScore - aiScore)
     if (delta === 0) return 'border-gray-200 bg-white'
@@ -163,6 +183,8 @@ function CalibrationView({ criteria, selfAssessment, aiAssessment, criterionNote
 
   return (
     <div className="space-y-3">
+      <QualityFlags flags={qualityFlags} />
+
       <div className="flex gap-2">
         <div className="flex-1 bg-blue-50 rounded-lg p-2 text-center">
           <p className="text-xs text-blue-600 font-medium">You</p>
@@ -230,7 +252,7 @@ function CalibrationView({ criteria, selfAssessment, aiAssessment, criterionNote
 }
 
 // Mode B: Iterations 2+ — AI progress over previous iteration
-function ProgressView({ criteria, aiAssessment, previousAiScores, criterionNotes, onCriterionNote }) {
+function ProgressView({ criteria, aiAssessment, previousAiScores, criterionNotes, onCriterionNote, qualityFlags }) {
   const getProgressClass = (currentScore, previousScore) => {
     if (previousScore == null) return 'border-gray-200 bg-white'
     const delta = currentScore - previousScore
@@ -251,6 +273,8 @@ function ProgressView({ criteria, aiAssessment, previousAiScores, criterionNotes
 
   return (
     <div className="space-y-3">
+      <QualityFlags flags={qualityFlags} />
+
       <div className="bg-purple-50 rounded-lg p-2 text-center">
         <p className="text-xs text-purple-600 font-medium">AI Assessment</p>
         <div className="flex items-center justify-center gap-2">

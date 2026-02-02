@@ -93,5 +93,9 @@ export function validateAssessmentResponse(parsed, expectedIds) {
     ? parsed.suggestions
     : {}
 
-  return { scores: parsed.scores, reasoning: parsed.reasoning, suggestions }
+  const qualityFlags = Array.isArray(parsed.qualityFlags)
+    ? parsed.qualityFlags.filter(f => typeof f === 'string' && f.trim())
+    : []
+
+  return { scores: parsed.scores, reasoning: parsed.reasoning, suggestions, qualityFlags }
 }
