@@ -6,12 +6,20 @@ function IterationCard({
   criteria,
   onSelfAssessSubmit,
   isLoading = false,
-  isActive = false
+  isActive = false,
+  criterionNotes,
+  onCriterionNote,
+  previousAiScores
 }) {
   const { id, draft, selfAssessment, aiAssessment } = iteration
-  const needsSelfAssessment = !selfAssessment
-  const needsAiAssessment = selfAssessment && !aiAssessment
-  const isComplete = selfAssessment && aiAssessment
+  const isFirstIteration = id === 1
+  const needsSelfAssessment = isFirstIteration && !selfAssessment
+  const needsAiAssessment = isFirstIteration
+    ? (selfAssessment && !aiAssessment)
+    : !aiAssessment
+  const isComplete = isFirstIteration
+    ? (selfAssessment && aiAssessment)
+    : !!aiAssessment
 
   return (
     <div className={`border rounded-lg overflow-hidden ${isActive ? 'border-blue-300 shadow-sm' : 'border-gray-200'}`}>
@@ -41,7 +49,7 @@ function IterationCard({
           </div>
         </div>
 
-        {/* Self-assessment form or completed assessment */}
+        {/* Self-assessment form - only for iteration 1 */}
         {needsSelfAssessment && isActive && (
           <InlineSelfAssessment
             criteria={criteria}
@@ -50,12 +58,15 @@ function IterationCard({
           />
         )}
 
-        {/* Show comparison when both assessments are complete */}
+        {/* Show comparison when assessment is complete */}
         {isComplete && (
           <AssessmentComparison
             criteria={criteria}
             selfAssessment={selfAssessment}
             aiAssessment={aiAssessment}
+            criterionNotes={criterionNotes}
+            onCriterionNote={onCriterionNote}
+            previousAiScores={previousAiScores}
           />
         )}
       </div>

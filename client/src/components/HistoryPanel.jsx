@@ -6,7 +6,9 @@ function HistoryPanel({
   iterations,
   currentIterationId,
   onSelfAssessSubmit,
-  isLoading
+  isLoading,
+  criterionNotes,
+  onCriterionNote
 }) {
   const hasIterations = iterations.length > 0
 
@@ -25,7 +27,7 @@ function HistoryPanel({
           </div>
         )}
 
-        {iterations.map((iteration) => (
+        {iterations.map((iteration, index) => (
           <IterationCard
             key={iteration.id}
             iteration={iteration}
@@ -33,6 +35,9 @@ function HistoryPanel({
             onSelfAssessSubmit={(scores) => onSelfAssessSubmit(iteration.id, scores)}
             isLoading={isLoading && currentIterationId === iteration.id}
             isActive={currentIterationId === iteration.id}
+            criterionNotes={criterionNotes}
+            onCriterionNote={onCriterionNote}
+            previousAiScores={index > 0 ? iterations[index - 1].aiAssessment?.scores || null : null}
           />
         ))}
       </div>

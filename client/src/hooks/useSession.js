@@ -9,6 +9,7 @@ const INITIAL_SESSION = {
     type: ''
   },
   criteria: [],
+  criterionNotes: {},
   iterations: [],
   workingDraft: '',
   currentIterationId: null
@@ -61,48 +62,25 @@ export function useSession() {
     }
   }
 
-  const submitDraft = (draft) => {
-    const newIterationId = session.iterations.length + 1
-    const newIteration = {
-      id: newIterationId,
-      draft,
-      selfAssessment: null,
-      aiAssessment: null
-    }
-
-    setSession(prev => ({
-      ...prev,
-      iterations: [...prev.iterations, newIteration],
-      currentIterationId: newIterationId
-    }))
-
-    return newIterationId
-  }
-
-  const submitSelfAssessment = async (iterationId, scores) => {
-    // Update self-assessment immediately
-    setSession(prev => ({
-      ...prev,
-      iterations: prev.iterations.map(iter =>
-        iter.id === iterationId
-          ? { ...iter, selfAssessment: scores }
-          : iter
-      )
-    }))
-
+  const fetchAiAssessment = async (iterationId, draft, previousAssessment) => {
     setIsLoading(true)
     setError(null)
 
     try {
-      const iteration = session.iterations.find(i => i.id === iterationId)
+      const body = {
+        draft,
+        criteria: session.criteria,
+        context: session.context,
+        criterionNotes: session.criterionNotes
+      }
+      if (previousAssessment) {
+        body.previousAssessment = previousAssessment
+      }
+
       const response = await fetch(API_ENDPOINTS.ASSESS_DRAFT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          draft: iteration.draft,
-          criteria: session.criteria,
-          context: session.context
-        })
+        body: JSON.stringify(body)
       })
 
       const data = await response.json()
@@ -118,7 +96,7 @@ export function useSession() {
             ? { ...iter, aiAssessment: data }
             : iter
         ),
-        workingDraft: iteration.draft,
+        workingDraft: draft,
         currentIterationId: null
       }))
 
@@ -129,6 +107,58 @@ export function useSession() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const submitDraft = async (draft) => {
+    const newIterationId = session.iterations.length + 1
+    const newIteration = {
+      id: newIterationId,
+      draft,
+      selfAssessment: null,
+      aiAssessment: null
+    }
+
+    setSession(prev => ({
+      ...prev,
+      iterations: [...prev.iterations, newIteration],
+      currentIterationId: newIterationId
+    }))
+
+    // Iterations 2+: skip self-assessment, immediately fetch AI assessment
+    if (newIterationId > 1) {
+      const previousIteration = session.iterations[session.iterations.length - 1]
+      const previousAssessment = previousIteration?.aiAssessment || null
+      await fetchAiAssessment(newIterationId, draft, previousAssessment)
+    }
+
+    return newIterationId
+  }
+
+  const saveCriterionNote = (criterionId, note) => {
+    setSession(prev => {
+      const updated = { ...prev.criterionNotes }
+      if (note && note.trim()) {
+        updated[criterionId] = note.trim()
+      } else {
+        delete updated[criterionId]
+      }
+      return { ...prev, criterionNotes: updated }
+    })
+  }
+
+  const submitSelfAssessment = async (iterationId, scores) => {
+    // Update self-assessment immediately
+    setSession(prev => ({
+      ...prev,
+      iterations: prev.iterations.map(iter =>
+        iter.id === iterationId
+          ? { ...iter, selfAssessment: scores }
+          : iter
+      )
+    }))
+
+    const iteration = session.iterations.find(i => i.id === iterationId)
+    return fetchAiAssessment(iterationId, iteration.draft, null)
   }
 
   // Derived state
@@ -151,6 +181,7 @@ export function useSession() {
     updateContext,
     extractCriteria,
     submitDraft,
-    submitSelfAssessment
+    submitSelfAssessment,
+    saveCriterionNote
   }
 }

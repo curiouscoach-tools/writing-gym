@@ -89,5 +89,9 @@ export function validateAssessmentResponse(parsed, expectedIds) {
     throw new Error(`Missing scores for criteria: ${missingScores.join(', ')}`)
   }
 
-  return { scores: parsed.scores, reasoning: parsed.reasoning }
+  const suggestions = (parsed.suggestions && typeof parsed.suggestions === 'object')
+    ? parsed.suggestions
+    : {}
+
+  return { scores: parsed.scores, reasoning: parsed.reasoning, suggestions }
 }

@@ -20,7 +20,8 @@ function App() {
     resetSession,
     extractCriteria,
     submitDraft,
-    submitSelfAssessment
+    submitSelfAssessment,
+    saveCriterionNote
   } = useSession()
 
   const handleContextSubmit = async () => {
@@ -70,6 +71,8 @@ function App() {
               onSelfAssessSubmit={submitSelfAssessment}
               isLoading={isLoading}
               editorDisabled={editorDisabled}
+              criterionNotes={session.criterionNotes}
+              onCriterionNote={saveCriterionNote}
             />
           </>
         )

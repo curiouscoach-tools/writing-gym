@@ -9,7 +9,9 @@ function Workspace({
   onDraftSubmit,
   onSelfAssessSubmit,
   isLoading,
-  editorDisabled
+  editorDisabled,
+  criterionNotes,
+  onCriterionNote
 }) {
   return (
     <div className="flex gap-6 h-[calc(100vh-180px)] min-h-[500px]">
@@ -45,6 +47,8 @@ function Workspace({
             currentIterationId={currentIterationId}
             onSelfAssessSubmit={onSelfAssessSubmit}
             isLoading={isLoading}
+            criterionNotes={criterionNotes}
+            onCriterionNote={onCriterionNote}
           />
         </div>
       </div>

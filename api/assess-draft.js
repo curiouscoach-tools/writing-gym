@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Service temporarily unavailable' })
   }
 
-  const { draft, criteria, context } = req.body
+  const { draft, criteria, context, criterionNotes, previousAssessment } = req.body
 
   if (!draft || typeof draft !== 'string' || !draft.trim()) {
     return res.status(400).json({ error: 'Draft is required and must be non-empty' })
@@ -34,7 +34,31 @@ export default async function handler(req, res) {
     })
   }
 
-  const criteriaList = criteria.map((c, i) => `${i + 1}. [ID: ${c.id}] ${c.description}`).join('\n')
+  const criteriaList = criteria.map((c, i) => {
+    let line = `${i + 1}. [ID: ${c.id}] ${c.description}`
+    if (criterionNotes && criterionNotes[c.id]) {
+      line += `\n   [Writer's context: "${criterionNotes[c.id]}"]`
+    }
+    return line
+  }).join('\n')
+
+  let previousAssessmentBlock = ''
+  if (previousAssessment && previousAssessment.scores && previousAssessment.reasoning) {
+    const prevLines = criteria.map(c => {
+      const score = previousAssessment.scores[c.id]
+      const reason = previousAssessment.reasoning[c.id]
+      return score != null ? `- ${c.description}: Score ${score} — "${reason || 'No reasoning'}"` : null
+    }).filter(Boolean).join('\n')
+
+    previousAssessmentBlock = `
+**Your previous assessment of an earlier draft:**
+${prevLines}
+
+The writer has revised their draft. Assess the new version against the same criteria.
+Reference specific improvements or regressions compared to the previous draft.
+
+`
+  }
 
   const prompt = `You are a writing coach assessing a draft. Score how well it meets each criterion on a 1-5 scale:
 1 = Strongly disagree (criterion not met at all)
@@ -51,13 +75,15 @@ export default async function handler(req, res) {
 
 **Criteria to assess:**
 ${criteriaList}
-
-**Draft to assess:**
+${previousAssessmentBlock}**Draft to assess:**
 ${draft}
 
 For each criterion, provide:
 - A score (1-5)
 - Brief reasoning (1-2 sentences explaining why you gave that score, with specific examples from the draft)
+- For scores 1-2: a reflective coaching question that helps the writer think about what's missing, without rewriting for them (e.g., "What would you say if you were responding to this person face-to-face? How would you acknowledge their experience before jumping to solutions?")
+- For score 3: a lighter nudge pointing at what could push it higher (e.g., "The intent is there — what specific detail or phrase could make it land more clearly?")
+- For scores 4-5: no suggestion needed, omit the key or set to null
 
 Respond with JSON only, no other text:
 {
@@ -67,6 +93,10 @@ Respond with JSON only, no other text:
   },
   "reasoning": {
     "criterion_id": "explanation string",
+    ...
+  },
+  "suggestions": {
+    "criterion_id": "coaching question or null",
     ...
   }
 }`
@@ -85,7 +115,8 @@ Respond with JSON only, no other text:
 
     res.status(200).json({
       scores: validated.scores,
-      reasoning: validated.reasoning
+      reasoning: validated.reasoning,
+      suggestions: validated.suggestions
     })
   } catch (err) {
     console.error('Error assessing draft:', err)

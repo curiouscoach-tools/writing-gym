@@ -198,6 +198,18 @@
       "type": "commit",
       "message": "Add branded header with logos, GitHub link, and hot-reload dev setup",
       "gitHash": "c58a3784c3dafaf5b676f1ae6b5f3cc7dde06848"
+    },
+    {
+      "id": "f1a2b3c4-d5e6-7f89-0abc-def123456789",
+      "timestamp": "2026-02-02T00:00:00.000Z",
+      "type": "note",
+      "content": "Implemented inline criterion pushback / context notes. Users can now respond to specific AI feedback with their own context (e.g. 'my team has Confluence docs — a pointer IS the clear next step'). Notes are session-level, stored in criterionNotes map keyed by criterion ID. They persist across iterations and get injected into the AI assessment prompt as [Writer's context: \"...\"] annotations so the AI factors them into scoring. Touched 7 files: useSession hook (state + saveCriterionNote action + API payload), prop threading through App → Workspace → HistoryPanel → IterationCard, new CriterionNote component in AssessmentComparison with Add context / Edit / Save+Cancel UI (slate-colored, visually distinct from AI reasoning), and assess-draft API endpoint to weave notes into the criteria list sent to Claude."
+    },
+    {
+      "id": "8e32185a-935f-4ac1-8e9c-78f0374e8a56",
+      "timestamp": "2026-02-02T17:29:13.201Z",
+      "type": "note",
+      "content": "Skip self-assessment on iterations 2+. Iteration 1 keeps the full self-assess → AI-assess → comparison calibration flow. Iterations 2+ submit draft and immediately fire AI assessment with previous iteration's scores as context — no self-assessment form. AI prompt now includes prior assessment so reasoning references specific improvements/regressions. AssessmentComparison has two rendering modes: CalibrationView (iteration 1, self vs AI with DeltaIndicator) and ProgressView (iterations 2+, AI scores with ProgressIndicator showing green/red/gray deltas from previous iteration). Changed 5 files: useSession.js (extracted fetchAiAssessment helper, async submitDraft), assess-draft.js (previousAssessment in prompt), IterationCard.jsx (conditional self-assess gating), HistoryPanel.jsx (previousAiScores computation), AssessmentComparison.jsx (CalibrationView + ProgressView split)."
     }
   ]
 }
