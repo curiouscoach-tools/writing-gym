@@ -22,7 +22,8 @@ export function getAnthropicClient() {
   if (!_anthropic) {
     validateEnv()
     _anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      timeout: 30_000
     })
   }
   return _anthropic

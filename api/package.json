@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.18.0"
+    "@anthropic-ai/sdk": "^0.72.0"
   }
 }

@@ -2,15 +2,14 @@
 // Override via environment variables in production
 
 export const CONFIG = {
-  // Claude model - using Sonnet for speed/cost balance
-  // Sonnet is fast enough for interactive use (1-3s vs 5-10s for Opus)
-  // Override with CLAUDE_MODEL env var to test other models
-  model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514',
+  // Claude model - Haiku for fast structured JSON tasks (sub-1s typical)
+  // Override with CLAUDE_MODEL=claude-sonnet-4-20250514 for higher quality
+  model: process.env.CLAUDE_MODEL || 'claude-3-5-haiku-latest',
 
-  // Token limits by endpoint
+  // Token limits by endpoint (sized to actual output)
   maxTokens: {
-    extractCriteria: 1024,
-    assessDraft: 2048
+    extractCriteria: 512,
+    assessDraft: 1024
   },
 
   // Assessment scale (used for criteria)
